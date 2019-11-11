@@ -1,0 +1,126 @@
+---
+title: "BKM Progress Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## From raw to BKM Sektörel Gelişim Reports Data
+
+First I download the data from BKM Sektörel Gelişim reports. We are interested in September 2018 sales. We will make a reproducible example of data analysis from the raw data located somewhere to the final analysis.
+
+## Data Extraction with rvest
+
+BKM Sektörel Gelişim Report includes transaction count and transaction amount according to debit card and credit card data. Before started the analysis, it should be scrapping the HTML code and make the data to suitable form for analysis:
+
+```{r extract, warning=FALSE}
+library("rvest")
+library("dplyr")
+
+filterData <- function(year, month){
+  url <- paste('https://bkm.com.tr/secilen-aya-ait-sektorel-gelisim/?filter_year=',year,'&filter_month=',month,'&List=Listele', sep='',collapse = NULL)
+  return (url)
+  }
+
+yearInFilter <- c('2014','2015', '2016','2017','2018')
+monthInFilter <- c('01','02','03','04','05','06','07','08','09','10','11','12')
+raw_data_selected <- ''
+
+for (i in 1:length(yearInFilter)) {
+  for (j in 1:length(monthInFilter)) {
+    url <- filterData(yearInFilter[i],monthInFilter[j])
+    html_page <- read_html(url)
+    df <- html_page %>%
+      html_nodes("table") %>% .[(4)] %>%
+      html_table(html_page, fill = TRUE,header = FALSE) %>%
+      as.data.frame()%>%
+      slice(3:max(nrow(.)))
+    df <- df %>%
+      #mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>%
+      mutate(yearMonth=paste(yearInFilter[i], monthInFilter[j], sep=''))
+    raw_data_selected <- rbind(raw_data_selected,df)
+  }
+}
+names(raw_data_selected) <- c("Sector", "Transctn_Cnt_CC", "Transctn_Cnt_DC", "Transctn_Amnt_CC", "Transctn_Amnt_DC","YearMonth")
+
+```
+## Explantion of columns
+
+Raw data includes 5 columns which are listed below:
+  Sector: Sector info
+  Transctn_Cnt_CC: Transaction count of credit card
+  Transctn_Cnt_DC: Transaction count of debit card
+  Transctn_Amnt_CC: Transaction amount of credit card
+  Transctn_Amnt_DC: Transaction amount of debit card
+  YearMonth: Year and date which data occurs
+
+## Data Analysis 
+
+##1: Progress of credit card transaction amount for top 5 sectors
+
+Before started first analysis, we found sectors that have most transaction amounts in five years. These are listed below:
+
+```{r}
+top_sectoral_total <- raw_data_selected %>%
+  select(Sector, Transctn_Amnt_CC, Transctn_Amnt_DC)%>%
+  group_by(Sector) %>%
+  summarize(Sectoral_total_cc_trns_amnt = sum(as.numeric(gsub(",", ".", gsub("\\.", "", Transctn_Amnt_CC))),na.rm=T),
+            Sectoral_total_dc_trns_amnt = sum(as.numeric(gsub(",", ".", gsub("\\.", "", Transctn_Amnt_DC))),na.rm=T)) %>%
+  mutate(Total_trns_amnt = Sectoral_total_cc_trns_amnt + Sectoral_total_dc_trns_amnt) %>%
+  arrange(desc(Total_trns_amnt)) %>%
+  filter(Sector != 'TOPLAM') %>%
+  head(top_sectoral_total, n=5)
+
+top_sector <- top_sectoral_total$Sector
+
+```
+After founded top sectors, we found that progress of credit card transaction amount for 5 sectors in years. 
+
+```{r}
+library("ggplot2")
+cc_progress_annual_top_sector <- raw_data_selected %>%
+  mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>%
+  mutate(year=substr(raw_data_selected$YearMonth,1,4)) %>%
+  group_by(Sector, year) %>%
+  summarize(cc_trns_amnt = sum(as.numeric(gsub(",", ".", gsub("\\.", "",Transctn_Amnt_CC))),na.rm=T)) %>%
+  filter(Sector %in% top_sector) %>%
+  arrange(desc(cc_trns_amnt))  %>%
+  ungroup()
+
+ggplot(cc_progress_annual_top_sector, aes(year, cc_trns_amnt, fill=Sector)) +
+  geom_bar(stat = "identity", position=position_dodge(0.9)) +
+  theme_minimal()+
+  labs(x="Year", y="Total Credit Card Transaction Amount",title="Progress of Top Sector in Credit Card Transaction Amount",fill= "Sector") +
+  theme(axis.text.x = element_text(angle=30)) +
+  scale_fill_brewer(palette="Paired") 
+
+```
+
+## Analysis 2: Difference between adjacent months in market sector
+
+```{r}
+difference_data <- raw_data_selected %>%
+  mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>%
+  mutate(year = substr(raw_data_selected$YearMonth,1,4),
+         month = substr(raw_data_selected$YearMonth,5,6)) %>%
+  group_by(Sector) %>%
+  filter(Sector == "MARKET VE ALIŞVERİŞ MERKEZLERİ" & year == "2018") %>%
+  mutate(difference = as.numeric(gsub(",", ".", gsub("\\.", "",Transctn_Amnt_CC))) - lag(as.numeric(gsub(",", ".", gsub("\\.", "",Transctn_Amnt_CC)))))
+
+difference_data
+
+ggplot(difference_data, aes(month, 
+                            difference)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  theme_minimal() +
+  coord_flip()
+```
+
+
+# Result
+
+As a result of analysis above, there are two important result:
+  Over the years, the sector with the highest credit card tranastion amount has been the market sector.
+  People spent more money with credit card in march.
