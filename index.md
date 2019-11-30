@@ -34,4 +34,4 @@ Your Pages site will use the layout and styles from the Jekyll theme you have se
 
 ### Homework 2 - BKM Data Analyis
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+Please see my homework about data analysis on BKM Sektörel Gelişim reports. After I gathered data from BKM reports, ı analysed progression of different sectors using dplyr and ggplt2 packages. You can see my analysis clicking on this [link.](https://github.com/pjournal/mef03-kamarn/blob/master/BKM_report-_data.html)
