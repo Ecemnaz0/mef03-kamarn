@@ -1,8 +1,6 @@
-## Welcome to my GitHub Pages
+## Progress Journal - Nilay Kamar
 
-You can use the [editor on GitHub](https://github.com/pjournal/mef03-kamarn/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+You can use my assignments and homeworks on this page. 
 
 ### Markdown
 
@@ -35,3 +33,7 @@ Your Pages site will use the layout and styles from the Jekyll theme you have se
 ### Homework 2 - BKM Data Analyis
 
 Please see my homework about data analysis on BKM Sektörel Gelişim reports. After I gathered data from BKM reports, ı analysed progression of different sectors using dplyr and ggplt2 packages. You can see my analysis clicking on this [link.](https://github.com/pjournal/mef03-kamarn/blob/master/BKM_report-_data.html)
+
+### Homework 3 - Join assignments
+
+You can see my analysis on tennis tourney datasets using joins. 
