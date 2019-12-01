@@ -39,4 +39,4 @@ Please see my homework about data analysis on BKM Sektörel Gelişim reports. Af
 
 ### Homework 3 - Join assignments
 
-You can see my [analysis](https://pjournal.github.io/pjournal/mef03-kamarn/week11_exercise.html) on tennis tourney datasets using joins. 
+You can see my [analysis](https://pjournal.github.io/mef03-kamarn/week11_exercise.html) on tennis tourney datasets using joins. 
