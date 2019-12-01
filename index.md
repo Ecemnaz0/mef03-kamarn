@@ -1,3 +1,6 @@
+title: "Nilay Kamar"
+output: html_document
+
 ## Progress Journal - Nilay Kamar
 
 You can use my assignments and homeworks on this page. 
